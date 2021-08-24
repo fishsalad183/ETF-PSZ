@@ -5,9 +5,14 @@
 
 
 # useful for handling different item types with a single interface
+from db.mysql import MysqlDAO
 from itemadapter import ItemAdapter
 
 
-class ScraperPipeline:
+class MySQLStorePipeline:
+    def __init__(self):
+        self.db = MysqlDAO("nekretnine")
+        
     def process_item(self, item, spider):
+        self.db.save(item)
         return item

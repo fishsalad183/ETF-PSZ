@@ -7,11 +7,32 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import logging
+from logging.handlers import RotatingFileHandler
+from scrapy.utils.log import configure_logging
+
+LOG_ENABLED = False
+# Disable default Scrapy log settings
+configure_logging(install_root_handler=False)
+# Define own logging settings
+log_file = 'scraper/tmp/log.txt'    # NOTE: The first directory is 'scraper' to enable starting scrapy from the directory above, i.e. the root directory
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+rotating_file_log = RotatingFileHandler(log_file, maxBytes=10485760, backupCount=1, encoding='utf-8')
+rotating_file_log.setFormatter(formatter)
+root_logger.addHandler(rotating_file_log)
+
+# LOG_ENABLED = True
+# LOG_FILE = 'scraper/tmp/log.txt'  # NOTE: The first directory is 'scraper' to enable starting scrapy from the directory above, i.e. the root directory!
+# LOG_LEVEL = 'DEBUG'
+# FEED_EXPORT_ENCODING = 'utf-8'
+
+
 BOT_NAME = 'scraper'
 
-SPIDER_MODULES = ['scraper.spiders']
-NEWSPIDER_MODULE = 'scraper.spiders'
-
+SPIDER_MODULES = ['scraper.scraper.spiders']    # NOTE: Changed from scraper.spiders to scraper.scraper.spiders to enable starting scrapy from the directory above, i.e. the root directory!
+NEWSPIDER_MODULE = 'scraper.scraper.spiders'    # NOTE: Changed from scraper.spiders to scraper.scraper.spiders to enable starting scrapy from the directory above, i.e. the root directory!
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0'
@@ -62,9 +83,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'scraper.pipelines.ScraperPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'scraper.scraper.pipelines.MySQLStorePipeline': 300, # NOTE: Changed from scraper.pipelines.MySQLStorePipeline to scraper.scraper.pipelines.MySQLStorePipeline to enable starting scrapy from the directory above, i.e. the root directory!
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

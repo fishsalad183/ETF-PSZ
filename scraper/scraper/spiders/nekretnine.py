@@ -1,7 +1,10 @@
+import re
+
+from itemloaders.processors import MapCompose, TakeFirst
 from ..items import NekretninaItem
-from scrapy.loader.processors import TakeFirst
 from itemloaders import ItemLoader
 import scrapy
+import logging
 
 
 class NekretnineSpider(scrapy.Spider):
@@ -20,11 +23,36 @@ class NekretnineSpider(scrapy.Spider):
         
         
     def parse_nekretnina(self, response):
+        def remove_whitespace(text):
+            return text.strip()
+        
+        def extract_ponuda(text):
+            if re.search("prodaja", text, re.IGNORECASE):
+                return "P"
+            elif re.search("izdavanje", text, re.IGNORECASE):
+                return "I"
+
+        def only_numeric_characters(text):
+            return re.sub("[^0-9]", "", text)
+
+        def extract_tip(text):
+            if re.search("stanovi", text):
+                return "stan"
+            elif re.search("kuce", text):
+                return "kuca"
+            elif re.search("sobe", text):
+                return "soba"
+            elif re.search("ostali", text):
+                return "ostalo"
+        
         nekretnina_loader = ItemLoader(item=NekretninaItem(), selector=response)
         
         nekretnina_loader.default_output_processor = TakeFirst()
         
-        nekretnina_loader.add_css('naslov', 'h1.detail-title::text')
-        nekretnina_loader.add_css('cena', 'h2.stickyBox__price::text')
+        nekretnina_loader.add_css('naslov', 'h1.detail-title::text', MapCompose(remove_whitespace))
+        # nekretnina_loader.add_css('ponuda', 'h2.detail-seo-subtitle::text', MapCompose(extract_ponuda))
+        nekretnina_loader.add_xpath('ponuda', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h2/text()', MapCompose(extract_ponuda))
+        nekretnina_loader.add_xpath('cena', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[1]/text()', MapCompose(only_numeric_characters))
+        nekretnina_loader.add_value('tip', response.request.url, MapCompose(extract_tip))
         
         yield nekretnina_loader.load_item()

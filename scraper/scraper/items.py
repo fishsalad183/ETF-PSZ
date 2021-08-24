@@ -5,26 +5,13 @@
 
 import re
 from scrapy.item import Field, Item
-from scrapy.loader.processors import MapCompose
 
-
-def remove_whitespace(text):
-    return text.strip()
-
-def only_numeric_characters(text):
-    return re.sub("[^0-9]", "", text)
 
 class NekretninaItem(Item):
-    naslov = Field(
-        input_processor=MapCompose(remove_whitespace)
-    )
-    cena = Field(
-        input_processor=MapCompose(only_numeric_characters)
-    )
-    ponuda = Field(
-        # input_processor=MapCompose()
-    )
+    naslov = Field()
     tip = Field()
+    ponuda = Field()
+    cena = Field()
     grad = Field()
     deo_grada = Field()
     kvadratura = Field()
