@@ -23,17 +23,20 @@ class NekretnineSpider(scrapy.Spider):
         
         
     def parse_nekretnina(self, response):
-        def remove_whitespace(text):
-            return text.strip()
-        
-        def extract_ponuda(text):
+        def extract_ponuda(text) -> str:
             if re.search("prodaja", text, re.IGNORECASE):
                 return "P"
             elif re.search("izdavanje", text, re.IGNORECASE):
                 return "I"
 
-        def only_numeric_characters(text):
+        def only_numeric_characters(text) -> str:
             return re.sub("[^0-9]", "", text)
+
+        def no_intervals(text) -> str:
+            if "-" not in text:
+                return only_numeric_characters(text)
+            else:
+                return None
 
         def extract_tip(text):
             if re.search("stanovi", text):
@@ -45,14 +48,50 @@ class NekretnineSpider(scrapy.Spider):
             elif re.search("ostali", text):
                 return "ostalo"
         
+        def to_boolean(text):
+            if re.match("da", text, re.IGNORECASE):
+                return True
+            elif re.match("ne", text, re.IGNORECASE):
+                return False
+        
         nekretnina_loader = ItemLoader(item=NekretninaItem(), selector=response)
         
         nekretnina_loader.default_output_processor = TakeFirst()
         
-        nekretnina_loader.add_css('naslov', 'h1.detail-title::text', MapCompose(remove_whitespace))
-        # nekretnina_loader.add_css('ponuda', 'h2.detail-seo-subtitle::text', MapCompose(extract_ponuda))
+        nekretnina_loader.add_xpath('naslov', '/html/body/div[6]/div[7]/div/div[1]/h1/text()', MapCompose(lambda text: text.strip()))
         nekretnina_loader.add_xpath('ponuda', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h2/text()', MapCompose(extract_ponuda))
         nekretnina_loader.add_xpath('cena', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[1]/text()', MapCompose(only_numeric_characters))
         nekretnina_loader.add_value('tip', response.request.url, MapCompose(extract_tip))
+        nekretnina_loader.add_xpath('grad', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[0]))
+        nekretnina_loader.add_xpath('deo_grada', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[1]))
+        nekretnina_loader.add_xpath('kvadratura', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[2]/text()', MapCompose(no_intervals))
+        nekretnina_loader.add_xpath('parking', '/html/body/div[6]/div[7]/div/div[1]/div[6]/div/ul/li[4]/span/text()', MapCompose(to_boolean))
         
+        podaci_keys = response.xpath('/html/body/div[6]/div[7]/div/div[1]/section[1]/div[1]/ul/li/text()').extract()
+        podaci_keys = map(lambda text: text.replace(":", "").strip(), podaci_keys)
+        podaci_keys = filter(lambda text: text != "", podaci_keys)
+        podaci_values = response.xpath('/html/body/div[6]/div[7]/div/div[1]/section[1]/div[1]/ul/li/strong/text()').extract()
+        podaci_values = map(str.strip, podaci_values)
+        podaci = dict(zip(podaci_keys, podaci_values))
+        
+        nekretnina_loader.add_value('stanje', podaci.get('Stanje nekretnine'))
+        nekretnina_loader.add_value('godina_izgradnje', podaci.get('Godina izgradnje'))
+        nekretnina_loader.add_value('povrsina_zemljista', only_numeric_characters(podaci.get('Površina zemljišta')) if podaci.get('Površina zemljišta') is not None else None)
+        nekretnina_loader.add_value('sprat', podaci.get('Spratnost'))
+        nekretnina_loader.add_value('spratnost', podaci.get('Ukupan broj spratova'))
+        nekretnina_loader.add_value('opremljenost', podaci.get('Opremljenost nekretnine'))
+        nekretnina_loader.add_value('uknjizeno', to_boolean(podaci.get('Uknjiženo')) if podaci.get('Uknjiženo') is not None else None)
+        nekretnina_loader.add_value('broj_soba', podaci.get('Ukupan broj soba'))
+        nekretnina_loader.add_value('broj_kupatila', podaci.get('Broj kupatila'))
+        
+        ostalo = {}
+        for o in response.xpath('/html/body/div[6]/div[7]/div/div[1]/section[1]/div[5]/ul/li/text()').extract():
+            spl = o.split(":")
+            ostalo[spl[0].strip()] = spl[1].strip()
+        nekretnina_loader.add_value('grejanje', ostalo.get('Grejanje'))
+        
+        dodatno = response.xpath('/html/body/div[6]/div[7]/div/div[1]/section[1]/div[2]/ul/li/text()').extract()
+        nekretnina_loader.add_value('lift', "Lift" in dodatno)  # What about False/None?
+        nekretnina_loader.add_value('terasa', "Terasa" in dodatno)  # What about False/None?
+            
         yield nekretnina_loader.load_item()

@@ -38,17 +38,50 @@ class MysqlDAO:
                             "naslov VARCHAR(255), "
                             "tip VARCHAR(255), "
                             "ponuda CHAR(1), "
-                            "cena INT "
+                            "cena INT, "
+                            "grad VARCHAR(255), "
+                            "deo_grada VARCHAR(255), "
+                            "kvadratura INT, "
+                            "stanje VARCHAR(255), "
+                            "godina_izgradnje INT, "
+                            "povrsina_zemljista INT, "
+                            "sprat INT, "
+                            "spratnost INT, "
+                            "opremljenost VARCHAR(255), "
+                            "uknjizeno BOOLEAN, "
+                            "grejanje VARCHAR(255), "
+                            "broj_soba DECIMAL(3, 1), "
+                            "broj_kupatila INT, "
+                            "parking BOOLEAN, "
+                            "lift BOOLEAN, "
+                            "terasa BOOLEAN "
                             ")")
         self.conn.commit()
         
     def save(self, item):
-        self.cursor.execute("INSERT INTO nekretnine (naslov, tip, ponuda, cena)"
-                            "VALUES (%s, %s, %s, %s)",
+        self.cursor.execute("INSERT INTO nekretnine ("
+                            "naslov, tip, ponuda, cena, grad, deo_grada, kvadratura, stanje, godina_izgradnje, povrsina_zemljista, sprat, spratnost, opremljenost, uknjizeno, grejanje, broj_soba, broj_kupatila, parking, lift, terasa"
+                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                             (item.get('naslov'),
                              item.get('tip'),
                              item.get('ponuda'),
                              item.get('cena'),
+                             item.get('grad'),
+                             item.get('deo_grada'),
+                             item.get('kvadratura'),
+                             item.get('stanje'),
+                             item.get('godina_izgradnje'),
+                             item.get('povrsina_zemljista'),
+                             item.get('sprat'),
+                             item.get('spratnost'),
+                             item.get('opremljenost'),
+                             item.get('uknjizeno'),
+                             item.get('grejanje'),
+                             item.get('broj_soba'),
+                             item.get('broj_kupatila'),
+                             item.get('parking'),
+                             item.get('lift'),
+                             item.get('terasa'),
                              )
                             )
         self.conn.commit()
