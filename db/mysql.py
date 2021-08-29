@@ -35,6 +35,7 @@ class MysqlDAO:
         self.cursor.execute("DROP TABLE IF EXISTS nekretnine")
         self.cursor.execute("CREATE TABLE nekretnine ("
                             "id INT AUTO_INCREMENT PRIMARY KEY, "
+                            "url VARCHAR(255), "
                             "naslov VARCHAR(255), "
                             "tip VARCHAR(255), "
                             "ponuda CHAR(1), "
@@ -45,7 +46,7 @@ class MysqlDAO:
                             "stanje VARCHAR(255), "
                             "godina_izgradnje INT, "
                             "povrsina_zemljista INT, "
-                            "sprat INT, "
+                            "sprat VARCHAR(255), "
                             "spratnost INT, "
                             "opremljenost VARCHAR(255), "
                             "uknjizeno BOOLEAN, "
@@ -60,9 +61,10 @@ class MysqlDAO:
         
     def save(self, item):
         self.cursor.execute("INSERT INTO nekretnine ("
-                            "naslov, tip, ponuda, cena, grad, deo_grada, kvadratura, stanje, godina_izgradnje, povrsina_zemljista, sprat, spratnost, opremljenost, uknjizeno, grejanje, broj_soba, broj_kupatila, parking, lift, terasa"
-                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            (item.get('naslov'),
+                            "url, naslov, tip, ponuda, cena, grad, deo_grada, kvadratura, stanje, godina_izgradnje, povrsina_zemljista, sprat, spratnost, opremljenost, uknjizeno, grejanje, broj_soba, broj_kupatila, parking, lift, terasa"
+                            ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (item.get('url'),
+                             item.get('naslov'),
                              item.get('tip'),
                              item.get('ponuda'),
                              item.get('cena'),

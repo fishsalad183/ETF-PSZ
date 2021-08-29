@@ -8,6 +8,7 @@ from scrapy.item import Field, Item
 
 
 class NekretninaItem(Item):
+    url = Field()
     naslov = Field()
     tip = Field()
     ponuda = Field()

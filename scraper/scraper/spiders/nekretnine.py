@@ -10,16 +10,19 @@ import logging
 class NekretnineSpider(scrapy.Spider):
     name = 'nekretnine'
     allowed_domains = ['nekretnine.rs']
-    start_urls = ['https://www.nekretnine.rs/stambeni-objekti/lista/po-stranici/20/stranica/1/']
-
+    start_urls = ['https://www.nekretnine.rs/stambeni-objekti/cena/_30000/lista/po-stranici/20/',
+                  'https://www.nekretnine.rs/stambeni-objekti/cena/30001_70000/lista/po-stranici/20/',
+                  'https://www.nekretnine.rs/stambeni-objekti/cena/70001_110000/lista/po-stranici/20/',
+                  'https://www.nekretnine.rs/stambeni-objekti/cena/110001_200000/lista/po-stranici/20/',
+                  'https://www.nekretnine.rs/stambeni-objekti/cena/200001_/lista/po-stranici/20/']
 
     def parse(self, response):
         nekretnina_page_links = response.css('h2.offer-title a::attr(href)')
         yield from response.follow_all(nekretnina_page_links, self.parse_nekretnina)
         
-        # pagination_links = response.css('a.next-article-button::attr(href)')
-        # if pagination_links is not None:
-        #     yield from response.follow_all(pagination_links, self.parse)
+        pagination_links = response.css('a.next-article-button::attr(href)')
+        if pagination_links is not None:
+            yield from response.follow_all(pagination_links, self.parse)
         
         
     def parse_nekretnina(self, response):
@@ -58,12 +61,13 @@ class NekretnineSpider(scrapy.Spider):
         
         nekretnina_loader.default_output_processor = TakeFirst()
         
+        nekretnina_loader.add_value('url', response.request.url)
         nekretnina_loader.add_xpath('naslov', '/html/body/div[6]/div[7]/div/div[1]/h1/text()', MapCompose(lambda text: text.strip()))
         nekretnina_loader.add_xpath('ponuda', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h2/text()', MapCompose(extract_ponuda))
-        nekretnina_loader.add_xpath('cena', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[1]/text()', MapCompose(only_numeric_characters))
+        nekretnina_loader.add_xpath('cena', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[1]/text()', MapCompose(no_intervals))
         nekretnina_loader.add_value('tip', response.request.url, MapCompose(extract_tip))
-        nekretnina_loader.add_xpath('grad', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[0]))
-        nekretnina_loader.add_xpath('deo_grada', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[1]))
+        nekretnina_loader.add_xpath('grad', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[0].strip()))
+        nekretnina_loader.add_xpath('deo_grada', '/html/body/div[6]/div[7]/div/div[1]/div[3]/h3/text()', MapCompose(lambda text: text.split(", ")[1].strip() if len(text.split(", ")) > 1 else None))
         nekretnina_loader.add_xpath('kvadratura', '/html/body/div[6]/div[7]/div/div[1]/div[3]/div/h4[2]/text()', MapCompose(no_intervals))
         nekretnina_loader.add_xpath('parking', '/html/body/div[6]/div[7]/div/div[1]/div[6]/div/ul/li[4]/span/text()', MapCompose(to_boolean))
         
@@ -91,7 +95,7 @@ class NekretnineSpider(scrapy.Spider):
         nekretnina_loader.add_value('grejanje', ostalo.get('Grejanje'))
         
         dodatno = response.xpath('/html/body/div[6]/div[7]/div/div[1]/section[1]/div[2]/ul/li/text()').extract()
-        nekretnina_loader.add_value('lift', "Lift" in dodatno)  # What about False/None?
-        nekretnina_loader.add_value('terasa', "Terasa" in dodatno)  # What about False/None?
+        nekretnina_loader.add_value('lift', True if "Lift" in dodatno else False)
+        nekretnina_loader.add_value('terasa', True if "Terasa" in dodatno else False)
             
         yield nekretnina_loader.load_item()
