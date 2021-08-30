@@ -29,5 +29,3 @@ class NekretninaItem(Item):
     parking = Field()
     lift = Field()
     terasa = Field()
-
-

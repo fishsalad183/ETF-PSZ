@@ -15,32 +15,33 @@ class MysqlDAO:
         if database != "":
             self.conf['db'] = database
         self.conn = self.mysql_connect()
-        self.cursor = self.conn.cursor()
-        
+        self.cursor = self.conn.cursor(dictionary=True)
+
     def mysql_connect(self):
         try:
             return mysql.connector.connect(**self.conf)
         except mysql.connector.Error as err:
             print(err)
-            
+
     def close(self):
         self.cursor.close()
         self.conn.close()
-    
+
     def import_database_from_dump(self):
         with open(self.dump_file, encoding='utf-8') as f:
-            self.cursor.execute('SET GLOBAL max_allowed_packet=67108864')   # Because the insert statement in the dump file is only one line
+            # Because the insert statement in the dump file is only one line
+            self.cursor.execute('SET GLOBAL max_allowed_packet=67108864')
             self.conn.commit()
             self.cursor.close()
-            self.cursor = self.conn.cursor()
-            
+            self.cursor = self.conn.cursor(dictionary=True)
+
             self.cursor.execute(f.read(), multi=True)
-    
+
     def create_database(self):
         self.cursor.execute("DROP DATABASE IF EXISTS nekretnine")
         self.cursor.execute("CREATE DATABASE nekretnine")
         self.conn.commit()
-            
+
     def create_table(self):
         self.cursor.execute("USE nekretnine")
         self.cursor.execute("DROP TABLE IF EXISTS nekretnine")
@@ -69,8 +70,8 @@ class MysqlDAO:
                             "terasa BOOLEAN "
                             ")")
         self.conn.commit()
-        
-    def save(self, item):
+
+    def save_nekretnina(self, item):
         self.cursor.execute("INSERT INTO nekretnine ("
                             "url, naslov, tip, ponuda, cena, grad, deo_grada, kvadratura, stanje, godina_izgradnje, povrsina_zemljista, sprat, spratnost, opremljenost, uknjizeno, grejanje, broj_soba, broj_kupatila, parking, lift, terasa"
                             ") VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -98,3 +99,54 @@ class MysqlDAO:
                              )
                             )
         self.conn.commit()
+
+    def prodaja_iznajmljivanje(self):
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE ponuda = 'P'")
+        prodaja_count = self.cursor.fetchall()
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE ponuda = 'I'")
+        iznajmljivanje_count = self.cursor.fetchall()
+        return {
+            "prodaja": prodaja_count,
+            "iznajmljivanje": iznajmljivanje_count,
+        }
+
+    def prodaja_po_gradovima(self):
+        self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND tip = 'stan' GROUP BY grad ORDER BY broj DESC")
+        stanovi = self.cursor.fetchall()
+        
+        self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND tip = 'kuca' GROUP BY grad ORDER BY broj DESC")
+        kuce = self.cursor.fetchall()
+        
+        self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND (tip = 'stan' OR tip = 'kuca') GROUP BY grad ORDER BY broj DESC")
+        stanovi_i_kuce = self.cursor.fetchall()
+        
+        return {
+            'stanovi': stanovi,
+            'kuce': kuce,
+            'stanovi_i_kuce': stanovi_i_kuce,
+        }
+    
+    def uknjizenost(self):
+        uknj = {}
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND uknjizeno IS TRUE")
+        uknj['stanovi_uknjizeno'] = self.cursor.fetchall()
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND uknjizeno IS NOT TRUE")
+        uknj['stanovi_neuknjizeno'] = self.cursor.fetchall()
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'kuca' AND uknjizeno IS TRUE")
+        uknj['kuce_uknjizeno'] = self.cursor.fetchall()
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'kuca' AND uknjizeno IS NOT TRUE")
+        uknj['kuce_neuknjizeno'] = self.cursor.fetchall()
+        return uknj
+        
+    def najskuplje(self):
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'stan' ORDER BY cena DESC LIMIT 30")
+        najskuplji_stanovi = self.cursor.fetchall()
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'kuca' ORDER BY cena DESC LIMIT 30")
+        najskuplje_kuce = self.cursor.fetchall()
+        return {
+            'najskuplji_stanovi': najskuplji_stanovi,
+            'najskuplje_kuce': najskuplje_kuce,
+            }
+        
+        
+        

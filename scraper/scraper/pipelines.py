@@ -14,5 +14,5 @@ class MySQLStorePipeline:
         self.db = MysqlDAO("nekretnine")
         
     def process_item(self, item, spider):
-        self.db.save(item)
+        self.db.save_nekretnina(item)
         return item
