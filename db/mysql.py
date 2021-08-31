@@ -9,7 +9,7 @@ class MysqlDAO:
         'password': 'root',
         # 'db': 'nekretnine',
     }
-    dump_file = 'db\Dump20210829.sql'
+    dump_file = "db\Dump20210901.sql"
 
     def __init__(self, database=""):
         if database != "":
@@ -54,7 +54,7 @@ class MysqlDAO:
                             "cena INT, "
                             "grad VARCHAR(255), "
                             "deo_grada VARCHAR(255), "
-                            "kvadratura INT, "
+                            "kvadratura DECIMAL(10, 2), "
                             "stanje VARCHAR(255), "
                             "godina_izgradnje INT, "
                             "povrsina_zemljista INT, "
@@ -146,7 +146,30 @@ class MysqlDAO:
         return {
             'najskuplji_stanovi': najskuplji_stanovi,
             'najskuplje_kuce': najskuplje_kuce,
-            }
+        }
         
+    def najvece(self):
+        self.cursor.execute("SELECT id, naslov, kvadratura, ponuda, cena, grad, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'stan' ORDER BY kvadratura DESC LIMIT 100")
+        najveci_stanovi = self.cursor.fetchall()
+        self.cursor.execute("SELECT id, naslov, kvadratura, ponuda, cena, grad, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'kuca' ORDER BY kvadratura DESC LIMIT 100")
+        najvece_kuce = self.cursor.fetchall()
+        return {
+            'najveci_stanovi': najveci_stanovi,
+            'najvece_kuce': najvece_kuce,
+        }
+
+    def cene_2020(self):
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'P' ORDER BY cena DESC")
+        prodaja = self.cursor.fetchall()
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'I' ORDER BY cena DESC")
+        izdavanje = self.cursor.fetchall()
+        return {
+            'prodaja': prodaja,
+            'izdavanje': izdavanje,
+        }
+        
+    def top_broj_soba(self):
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, broj_soba, broj_kupatila FROM nekretnine ORDER BY broj_soba DESC LIMIT 30")
+        return self.cursor.fetchall()
         
         

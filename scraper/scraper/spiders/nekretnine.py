@@ -32,16 +32,16 @@ class NekretnineSpider(scrapy.Spider):
             elif re.search("izdavanje", text, re.IGNORECASE):
                 return "I"
 
-        def only_numeric_characters(text) -> str:
-            return re.sub("[^0-9]", "", text)
+        def only_numbers(text) -> str:
+            return re.sub("[^0-9\.]", "", text)
 
         def no_intervals(text) -> str:
             if "-" not in text:
-                return only_numeric_characters(text)
+                return only_numbers(text)
             else:
                 return None
 
-        def extract_tip(text):
+        def extract_tip(text) -> str:
             if re.search("stanovi", text):
                 return "stan"
             elif re.search("kuce", text):
@@ -51,7 +51,7 @@ class NekretnineSpider(scrapy.Spider):
             elif re.search("ostali", text):
                 return "ostalo"
         
-        def to_boolean(text):
+        def to_boolean(text) -> bool:
             if re.match("da", text, re.IGNORECASE):
                 return True
             elif re.match("ne", text, re.IGNORECASE):
@@ -80,7 +80,7 @@ class NekretnineSpider(scrapy.Spider):
         
         nekretnina_loader.add_value('stanje', podaci.get('Stanje nekretnine'))
         nekretnina_loader.add_value('godina_izgradnje', podaci.get('Godina izgradnje'))
-        nekretnina_loader.add_value('povrsina_zemljista', only_numeric_characters(podaci.get('Površina zemljišta')) if podaci.get('Površina zemljišta') is not None else None)
+        nekretnina_loader.add_value('povrsina_zemljista', only_numbers(podaci.get('Površina zemljišta')) if podaci.get('Površina zemljišta') is not None else None)
         nekretnina_loader.add_value('sprat', podaci.get('Spratnost'))
         nekretnina_loader.add_value('spratnost', podaci.get('Ukupan broj spratova'))
         nekretnina_loader.add_value('opremljenost', podaci.get('Opremljenost nekretnine'))
