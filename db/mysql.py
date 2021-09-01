@@ -159,9 +159,9 @@ class MysqlDAO:
         }
 
     def cene_2020(self):
-        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'P' ORDER BY cena DESC")
+        self.cursor.execute("SELECT id, cena, naslov, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'P' ORDER BY cena DESC")
         prodaja = self.cursor.fetchall()
-        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'I' ORDER BY cena DESC")
+        self.cursor.execute("SELECT id, cena, naslov, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'I' ORDER BY cena DESC")
         izdavanje = self.cursor.fetchall()
         return {
             'prodaja': prodaja,
@@ -169,7 +169,21 @@ class MysqlDAO:
         }
         
     def top_broj_soba(self):
-        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, broj_soba, broj_kupatila FROM nekretnine ORDER BY broj_soba DESC LIMIT 30")
+        self.cursor.execute("SELECT id, broj_soba, tip, naslov, cena, grad, kvadratura, broj_soba, broj_kupatila FROM nekretnine ORDER BY broj_soba DESC LIMIT 30")
         return self.cursor.fetchall()
+        
+    def top_kvadratura_stanovi(self):
+        self.cursor.execute("SELECT id, kvadratura, naslov, cena, grad, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'stan' ORDER BY kvadratura DESC LIMIT 30")
+        return self.cursor.fetchall()
+    
+    def top_povrsina_zemljista(self):
+        self.cursor.execute("SELECT id, povrsina_zemljista, naslov, cena, kvadratura, grad FROM nekretnine ORDER BY povrsina_zemljista DESC LIMIT 30")
+        return self.cursor.fetchall()
+
+    def top_delovi_beograda(self):
+        self.cursor.execute("SELECT deo_grada, COUNT(*) as broj_nekretnina FROM nekretnine WHERE grad = 'Beograd' GROUP BY deo_grada ORDER BY broj_nekretnina DESC LIMIT 10")
+        return self.cursor.fetchall()
+        
+        
         
         
