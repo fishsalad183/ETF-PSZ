@@ -181,9 +181,40 @@ class MysqlDAO:
         return self.cursor.fetchall()
 
     def top_delovi_beograda(self):
-        self.cursor.execute("SELECT deo_grada, COUNT(*) as broj_nekretnina FROM nekretnine WHERE grad = 'Beograd' GROUP BY deo_grada ORDER BY broj_nekretnina DESC LIMIT 10")
+        self.cursor.execute("SELECT deo_grada, COUNT(*) AS broj_nekretnina FROM nekretnine WHERE grad = 'Beograd' GROUP BY deo_grada ORDER BY broj_nekretnina DESC LIMIT 10")
         return self.cursor.fetchall()
+    
+    def broj_nekretnina_u_beogradu(self):
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE grad = 'beograd'")
+        return self.cursor.fetchone()['broj']
+    
+    def kategorije_kvadrature(self):
+        kategorije = {}
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura <= 35")
+        kategorije['do_35'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 35 AND kvadratura <= 50")
+        kategorije['36-50'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 51 AND kvadratura <= 65")
+        kategorije['51-65'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 66 AND kvadratura <= 80")
+        kategorije['66-80'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 81 AND kvadratura <= 95")
+        kategorije['81-95'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 96 AND kvadratura <= 110")
+        kategorije['96-110'] = self.cursor.fetchone()['broj']
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 110")
+        kategorije['od_111'] = self.cursor.fetchone()['broj']
+        return kategorije
+    
+    def broj_stanova_za_prodaju(self):
+        self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P'")
+        return self.cursor.fetchone()['broj']
         
-        
-        
-        
+    def nekretnine_po_dekadama(self):
+        nekretnine = {}
+        prepared_statement = "SELECT COUNT(*) AS broj FROM nekretnine WHERE godina_izgradnje >= %s AND godina_izgradnje <= %s"
+        dekade = [(1951, 1960), (1961, 1970), (1971, 1980), (1981, 1990), (1991, 2000), (2001, 2010), (2011, 2020)]
+        for d in dekade:
+            self.cursor.execute(prepared_statement, d)
+            nekretnine[str(d)] = self.cursor.fetchone()['broj']
+        return nekretnine
