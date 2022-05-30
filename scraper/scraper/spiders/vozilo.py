@@ -43,10 +43,6 @@ class VoziloSpider(scrapy.Spider):
         
         podaci_raw = response.css('div.divider div.uk-width-1-2::text').getall()
         podaci_raw = list(map(lambda text: text.replace(':', '').strip(), podaci_raw))
-        # podaci_raw = list(filter(lambda text: text, podaci_raw))
-        # podaci_keys = podaci_raw[::2]
-        # podaci_values = podaci_raw[1::2]
-        # podaci = dict(zip(podaci_keys, podaci_values))
         
         def val(label):
             index = podaci_raw.index(label)
@@ -65,20 +61,6 @@ class VoziloSpider(scrapy.Spider):
         vozilo_loader.add_value('vrata', val('Broj vrata'))
         vozilo_loader.add_value('boja', val('Boja'))
         
-        # vozilo_loader.add_value('stanje', podaci.get('Stanje'))
-        # vozilo_loader.add_value('marka', podaci.get('Marka'))
-        # vozilo_loader.add_value('model', podaci.get('Model'))
-        # vozilo_loader.add_value('godiste', only_digits(podaci.get('Godište')))
-        # vozilo_loader.add_value('kilometraza', only_digits(podaci.get('Kilometraža')))
-        # vozilo_loader.add_value('karoserija', podaci.get('Karoserija'))
-        # vozilo_loader.add_value('gorivo', podaci.get('Gorivo'))
-        # vozilo_loader.add_value('kubikaza', only_digits(podaci.get('Kubikaža')))
-        # vozilo_loader.add_value('snaga', podaci.get('Snaga motora'))
-        # vozilo_loader.add_value('menjac', podaci.get('Menjač'))
-        # vozilo_loader.add_value('vrata', podaci.get('Broj vrata'))
-        # vozilo_loader.add_value('boja', podaci.get('Crna'))
-        
         vozilo_loader.add_value('lokacija_prodavca', lokacije[self._vozilo_index])
-        # self._vozilo_index = (self._vozilo_index + 1) % len(lokacije)
 
         yield vozilo_loader.load_item()
