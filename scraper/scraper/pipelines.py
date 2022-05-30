@@ -4,15 +4,12 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-# useful for handling different item types with a single interface
-from db.mysql import MysqlDAO
-from itemadapter import ItemAdapter
-
+from db.db import MysqlDAO
 
 class MySQLStorePipeline:
     def __init__(self):
-        self.db = MysqlDAO("nekretnine")
+        self.db = MysqlDAO("vozila")
         
     def process_item(self, item, spider):
-        self.db.save_nekretnina(item)
+        self.db.save_vozilo(item)
         return item
