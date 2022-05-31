@@ -11,6 +11,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from scrapy.utils.log import configure_logging
 
+csv_file_path = 'db/scrapy_vozila.csv'
+
 LOG_ENABLED = False
 # Disable default Scrapy log settings
 configure_logging(install_root_handler=False)
@@ -26,7 +28,7 @@ root_logger.addHandler(rotating_file_log)
 # LOG_ENABLED = True
 # LOG_FILE = 'scraper/tmp/log.txt'  # NOTE: The first directory is 'scraper' to enable starting scrapy from the directory above, i.e. the root directory!
 # LOG_LEVEL = 'DEBUG'
-# FEED_EXPORT_ENCODING = 'utf-8'
+FEED_EXPORT_ENCODING = 'utf-8'
 
 
 BOT_NAME = 'scraper'
@@ -34,8 +36,6 @@ BOT_NAME = 'scraper'
 SPIDER_MODULES = ['scraper.scraper.spiders']    # NOTE: Changed from scraper.spiders to scraper.scraper.spiders to enable starting scrapy from the directory above, i.e. the root directory!
 NEWSPIDER_MODULE = 'scraper.scraper.spiders'    # NOTE: Changed from scraper.spiders to scraper.scraper.spiders to enable starting scrapy from the directory above, i.e. the root directory!
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -46,13 +46,13 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.25
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -71,9 +71,18 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
+DOWNLOADER_MIDDLEWARES = {
 #    'scraper.middlewares.ScraperDownloaderMiddleware': 543,
-#}
+}
+
+
+# For the scrapy-rotating-proxies package
+DOWNLOADER_MIDDLEWARES.update({
+    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+})
+ROTATING_PROXY_LIST_PATH = 'proxies/proxies.txt'
+
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -107,3 +116,25 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+# USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0'
+# For rotating user agents (requires pip install scrapy-useragents)
+# See https://python.plainenglish.io/rotating-user-agent-with-scrapy-78ca141969fe
+DOWNLOADER_MIDDLEWARES.update({
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500,
+})
+USER_AGENTS = [
+    ('Mozilla/5.0 (X11; Linux x86_64) '
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/57.0.2987.110 '
+     'Safari/537.36'),  # chrome
+    ('Mozilla/5.0 (X11; Linux x86_64) '
+     'AppleWebKit/537.36 (KHTML, like Gecko) '
+     'Chrome/61.0.3163.79 '
+     'Safari/537.36'),  # chrome
+    ('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) '
+     'Gecko/20100101 '
+     'Firefox/55.0')  # firefox
+]
