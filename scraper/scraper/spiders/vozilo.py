@@ -32,6 +32,9 @@ class VoziloSpider(scrapy.Spider):
         
         def only_digits(text) -> str:
             return re.sub("[^0-9]", "", text)
+        
+        def only_digits_if_contains_digit(text) -> str:
+            return only_digits(text) if any(char.isdigit() for char in text) else text
 
         vozilo_loader = ItemLoader(item=VoziloItem(), selector=response)
         
@@ -39,7 +42,7 @@ class VoziloSpider(scrapy.Spider):
         
         vozilo_loader.add_value('url', response.request.url)
         vozilo_loader.add_css('naslov', 'h1::text', MapCompose(lambda text: text.strip()))
-        vozilo_loader.add_css('cena', 'span.priceClassified::text', MapCompose(lambda text: text.strip()))
+        vozilo_loader.add_css('cena', 'span.priceClassified::text', MapCompose(lambda text: only_digits_if_contains_digit(text.strip())))
         
         podaci_raw = response.css('div.divider div.uk-width-1-2::text').getall()
         podaci_raw = list(map(lambda text: text.replace(':', '').strip(), podaci_raw))

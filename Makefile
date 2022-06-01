@@ -1,5 +1,17 @@
+# TODO: Make the scrape command last for 6 hours max
+scrape: delete_csv rmdir scraper/tmp scrape_only collect_proxies
+
+scrape_only:
+	py zadatak1_scrape.py
+
 collect_proxies:
-	python proxies/proxies_scraper.py
+	py proxies/proxies_scraper.py
+
+delete_csv:
+	rm db/scrapy_vozila.csv
+
+delete_scraper_logs:
+	rmdir scraper/tmp
 
 test_scrapy_shell_vozilo_list:
 	scrapy shell -s USER_AGENT='Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0' 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=1&sort=basic&city_distance=0&showOldNew=all&without_price=1'

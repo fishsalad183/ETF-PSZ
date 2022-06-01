@@ -10,7 +10,7 @@ class MysqlDAO:
         # 'db': 'vozila',
         # 'db': 'nekretnine',
     }
-    dump_file = "db\Dump20220530.sql"
+    dump_file = "db\Dump20220601.sql"
 
     def __init__(self, database=""):
         if database != "":
@@ -91,53 +91,27 @@ class MysqlDAO:
                             )
         self.conn.commit()
 
-    # def prodaja_iznajmljivanje(self):
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE ponuda = 'P'")
-    #     prodaja_count = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE ponuda = 'I'")
-    #     iznajmljivanje_count = self.cursor.fetchall()
-    #     return {
-    #         "prodaja": prodaja_count,
-    #         "iznajmljivanje": iznajmljivanje_count,
-    #     }
+    def marka_count(self):
+        self.cursor.execute("SELECT marka, COUNT(*) AS cnt FROM vozila.vozila GROUP BY marka ORDER by cnt DESC")
+        return self.cursor.fetchall()
 
-    # def prodaja_po_gradovima(self):
-    #     self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND tip = 'stan' GROUP BY grad ORDER BY broj DESC")
-    #     stanovi = self.cursor.fetchall()
-        
-    #     self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND tip = 'kuca' GROUP BY grad ORDER BY broj DESC")
-    #     kuce = self.cursor.fetchall()
-        
-    #     self.cursor.execute("SELECT COUNT(*) AS broj, grad FROM nekretnine WHERE ponuda = 'P' AND (tip = 'stan' OR tip = 'kuca') GROUP BY grad ORDER BY broj DESC")
-    #     stanovi_i_kuce = self.cursor.fetchall()
-        
-    #     return {
-    #         'stanovi': stanovi,
-    #         'kuce': kuce,
-    #         'stanovi_i_kuce': stanovi_i_kuce,
-    #     }
+    def gradovi_count(self):
+        self.cursor.execute("SELECT lokacija_prodavca, COUNT(*) AS cnt FROM vozila.vozila GROUP BY lokacija_prodavca ORDER BY cnt DESC")
+        return self.cursor.fetchall()
     
-    # def uknjizenost(self):
-    #     uknj = {}
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND uknjizeno IS TRUE")
-    #     uknj['stanovi_uknjizeno'] = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND uknjizeno IS NOT TRUE")
-    #     uknj['stanovi_neuknjizeno'] = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'kuca' AND uknjizeno IS TRUE")
-    #     uknj['kuce_uknjizeno'] = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'kuca' AND uknjizeno IS NOT TRUE")
-    #     uknj['kuce_neuknjizeno'] = self.cursor.fetchall()
-    #     return uknj
+    def boja_count(self):
+        self.cursor.execute("SELECT boja, COUNT(*) AS cnt FROM vozila.vozila GROUP BY boja ORDER BY cnt DESC")
+        return self.cursor.fetchall()
         
-    # def najskuplje(self):
-    #     self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'stan' ORDER BY cena DESC LIMIT 30")
-    #     najskuplji_stanovi = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'kuca' ORDER BY cena DESC LIMIT 30")
-    #     najskuplje_kuce = self.cursor.fetchall()
-    #     return {
-    #         'najskuplji_stanovi': najskuplji_stanovi,
-    #         'najskuplje_kuce': najskuplje_kuce,
-    #     }
+    def najskuplje(self):
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'stan' ORDER BY cena DESC LIMIT 30")
+        najskuplji_stanovi = self.cursor.fetchall()
+        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'kuca' ORDER BY cena DESC LIMIT 30")
+        najskuplje_kuce = self.cursor.fetchall()
+        return {
+            'najskuplji_stanovi': najskuplji_stanovi,
+            'najskuplje_kuce': najskuplje_kuce,
+        }
         
     # def najvece(self):
     #     self.cursor.execute("SELECT id, naslov, kvadratura, ponuda, cena, grad, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'stan' ORDER BY kvadratura DESC LIMIT 100")
