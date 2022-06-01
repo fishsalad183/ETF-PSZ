@@ -1,13 +1,11 @@
 from lxml.html import fromstring
 import requests
 from datetime import datetime
-
-import schedule
 import time
 
 URL = 'https://free-proxy-list.net/'
 
-def get_proxies():
+def scrape_proxies():
 	response = requests.get(URL)
 	parser = fromstring(response.text)
 	proxies = set()
@@ -20,11 +18,11 @@ def get_proxies():
 
 
 TIMEOUT = 3
+OUTPUT_FILE = 'scraper/tmp/proxies.txt'
 
-
-def job():
+def collect_proxies():
 	print(f"Collecting proxies {datetime.now()}")
-	proxies = get_proxies()
+	proxies = scrape_proxies()
 	valid_proxies = []
 	for proxy in proxies:
 		try:
@@ -34,17 +32,13 @@ def job():
 		except:
 			print(f'Bad proxy: {proxy}')
 	
-	print(f'Saving proxies ({len(valid_proxies)}):{valid_proxies}')
-	output = open('scraper/tmp/proxies.txt', 'w')
+	print(f'Saving proxies ({len(valid_proxies)}) : {valid_proxies}')
+	output = open(OUTPUT_FILE, 'w')
 	for p in valid_proxies:
 		output.write(p + '\n')
 	output.close()
 
-job()
-schedule.every(2).minutes.do(job)
 
-while 1:
-    schedule.run_pending()
-    time.sleep(1)
-
-
+while True:
+    collect_proxies()
+    time.sleep(120)
