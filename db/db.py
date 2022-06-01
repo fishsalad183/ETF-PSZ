@@ -104,13 +104,13 @@ class MysqlDAO:
         return self.cursor.fetchall()
         
     def najskuplje(self):
-        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'stan' ORDER BY cena DESC LIMIT 30")
-        najskuplji_stanovi = self.cursor.fetchall()
-        self.cursor.execute("SELECT id, naslov, cena, grad, kvadratura, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE ponuda = 'P' and tip = 'kuca' ORDER BY cena DESC LIMIT 30")
-        najskuplje_kuce = self.cursor.fetchall()
+        self.cursor.execute("SELECT * FROM vozila.vozila WHERE cena REGEXP '[0-9]' ORDER BY CAST(cena AS UNSIGNED) DESC LIMIT 30")
+        najskuplja_vozila = self.cursor.fetchall()
+        self.cursor.execute("SELECT * FROM vozila.vozila WHERE cena REGEXP '[0-9]' AND karoserija = 'Džip/SUV' ORDER BY CAST(cena AS UNSIGNED) DESC LIMIT 30")
+        najskuplji_dzipovi = self.cursor.fetchall()
         return {
-            'najskuplji_stanovi': najskuplji_stanovi,
-            'najskuplje_kuce': najskuplje_kuce,
+            'najskuplja_vozila': najskuplja_vozila,
+            'najskuplji_dzipovi': najskuplji_dzipovi,
         }
         
     # def najvece(self):
