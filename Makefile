@@ -1,8 +1,9 @@
 # NOTE: The commands are designed for Windows
 
 # TODO: Make the scrape command last for 6 hours max
-scrape: clear_csv clear_scraper_logs clear_proxies run_scraper collect_proxies
-scrape_without_cleaning: run_scraper collect_proxies
+scrape: clear_tmp run_scraper collect_proxies
+
+clear_tmp: clear_csv clear_scraper_logs clear_proxies
 
 clear_csv:
 	- cat /dev/null > scraper\tmp\scrapy_vozila.csv
