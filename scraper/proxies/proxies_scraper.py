@@ -35,7 +35,7 @@ def job():
 			print(f'Bad proxy: {proxy}')
 	
 	print(f'Saving proxies ({len(valid_proxies)}):{valid_proxies}')
-	output = open('proxies/proxies.txt', 'w')
+	output = open('scraper/tmp/proxies.txt', 'w')
 	for p in valid_proxies:
 		output.write(p + '\n')
 	output.close()

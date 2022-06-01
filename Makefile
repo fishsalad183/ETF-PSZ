@@ -1,17 +1,23 @@
-# TODO: Make the scrape command last for 6 hours max
-scrape: delete_csv rmdir scraper/tmp scrape_only collect_proxies
+# NOTE: The commands are designed for Windows
 
-scrape_only:
+# TODO: Make the scrape command last for 6 hours max
+scrape: clear_csv clear_scraper_logs clear_proxies run_scraper collect_proxies
+scrape_without_cleaning: run_scraper collect_proxies
+
+clear_csv:
+	- cat /dev/null > scraper\tmp\scrapy_vozila.csv
+
+clear_scraper_logs:
+	- cat /dev/null > scraper\tmp\log.txt
+
+clear_proxies:
+	- cat /dev/null > scraper\tmp\proxies.txt
+
+run_scraper:
 	py zadatak1_scrape.py
 
 collect_proxies:
-	py proxies/proxies_scraper.py
-
-delete_csv:
-	rm db/scrapy_vozila.csv
-
-delete_scraper_logs:
-	rmdir scraper/tmp
+	py scraper/proxies/proxies_scraper.py
 
 test_scrapy_shell_vozilo_list:
 	scrapy shell -s USER_AGENT='Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0' 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=1&sort=basic&city_distance=0&showOldNew=all&without_price=1'

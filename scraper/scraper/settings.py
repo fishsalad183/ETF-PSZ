@@ -11,7 +11,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from scrapy.utils.log import configure_logging
 
-csv_file_path = 'db/scrapy_vozila.csv'
+csv_file_path = 'scraper/tmp/scrapy_vozila.csv'
 
 LOG_ENABLED = False
 # Disable default Scrapy log settings
@@ -81,7 +81,7 @@ DOWNLOADER_MIDDLEWARES.update({
     'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
     'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
 })
-ROTATING_PROXY_LIST_PATH = 'proxies/proxies.txt'
+ROTATING_PROXY_LIST_PATH = 'scraper/tmp/proxies.txt'
 
 
 # Enable or disable extensions
