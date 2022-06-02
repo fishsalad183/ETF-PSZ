@@ -10,7 +10,7 @@ class MysqlDAO:
         # 'db': 'vozila',
         # 'db': 'nekretnine',
     }
-    dump_file = "db\Dump20220601.sql"
+    DUMP_FILE = "db\Dump20220602.sql"
 
     def __init__(self, database=""):
         if database != "":
@@ -29,7 +29,7 @@ class MysqlDAO:
         self.conn.close()
 
     def import_database_from_dump(self):
-        with open(self.dump_file, encoding='utf-8') as f:
+        with open(self.DUMP_FILE, encoding='utf-8') as f:
             # Because the insert statement in the dump file is only one line
             self.cursor.execute('SET GLOBAL max_allowed_packet=67108864')
             self.conn.commit()
@@ -113,76 +113,18 @@ class MysqlDAO:
             'najskuplji_dzipovi': najskuplji_dzipovi,
         }
         
-    # def najvece(self):
-    #     self.cursor.execute("SELECT id, naslov, kvadratura, ponuda, cena, grad, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'stan' ORDER BY kvadratura DESC LIMIT 100")
-    #     najveci_stanovi = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT id, naslov, kvadratura, ponuda, cena, grad, stanje, godina_izgradnje, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'kuca' ORDER BY kvadratura DESC LIMIT 100")
-    #     najvece_kuce = self.cursor.fetchall()
-    #     return {
-    #         'najveci_stanovi': najveci_stanovi,
-    #         'najvece_kuce': najvece_kuce,
-    #     }
+    def najskuplje_2021_2022(self):
+        self.cursor.execute("SELECT * FROM vozila.vozila WHERE godiste IN (2021, 2022) AND cena REGEXP '[0-9]' ORDER BY CAST(cena AS UNSIGNED) DESC LIMIT 30")
+        return self.cursor.fetchall()
+    
+    def sorted_kubikaza(self):
+        self.cursor.execute("SELECT * FROM vozila.vozila WHERE kubikaza < 10000 ORDER BY kubikaza DESC limit 10")
+        return self.cursor.fetchall()
+    
+    def sorted_snaga(self):
+        self.cursor.execute("SELECT * FROM vozila.vozila ORDER BY CAST(REGEXP_SUBSTR(snaga, '(?<=/)\\\\d+') AS UNSIGNED) DESC LIMIT 10")    # Note the 4 backslashes for Python
+        return self.cursor.fetchall()
 
-    # def cene_2020(self):
-    #     self.cursor.execute("SELECT id, cena, naslov, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'P' ORDER BY cena DESC")
-    #     prodaja = self.cursor.fetchall()
-    #     self.cursor.execute("SELECT id, cena, naslov, grad, kvadratura FROM nekretnine WHERE godina_izgradnje = '2020' AND ponuda = 'I' ORDER BY cena DESC")
-    #     izdavanje = self.cursor.fetchall()
-    #     return {
-    #         'prodaja': prodaja,
-    #         'izdavanje': izdavanje,
-    #     }
-        
-    # def top_broj_soba(self):
-    #     self.cursor.execute("SELECT id, broj_soba, tip, naslov, cena, grad, kvadratura, broj_soba, broj_kupatila FROM nekretnine ORDER BY broj_soba DESC LIMIT 30")
-    #     return self.cursor.fetchall()
-        
-    # def top_kvadratura_stanovi(self):
-    #     self.cursor.execute("SELECT id, kvadratura, naslov, cena, grad, broj_soba, broj_kupatila FROM nekretnine WHERE tip = 'stan' ORDER BY kvadratura DESC LIMIT 30")
-    #     return self.cursor.fetchall()
-    
-    # def top_povrsina_zemljista(self):
-    #     self.cursor.execute("SELECT id, povrsina_zemljista, naslov, cena, kvadratura, grad FROM nekretnine ORDER BY povrsina_zemljista DESC LIMIT 30")
-    #     return self.cursor.fetchall()
-
-    # def top_delovi_beograda(self):
-    #     self.cursor.execute("SELECT deo_grada, COUNT(*) AS broj_nekretnina FROM nekretnine WHERE grad = 'Beograd' GROUP BY deo_grada ORDER BY broj_nekretnina DESC LIMIT 10")
-    #     return self.cursor.fetchall()
-    
-    # def broj_nekretnina_u_beogradu(self):
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE grad = 'beograd'")
-    #     return self.cursor.fetchone()['broj']
-    
-    # def kategorije_kvadrature(self):
-    #     kategorije = {}
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura <= 35")
-    #     kategorije['do_35'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 35 AND kvadratura <= 50")
-    #     kategorije['36-50'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 51 AND kvadratura <= 65")
-    #     kategorije['51-65'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 66 AND kvadratura <= 80")
-    #     kategorije['66-80'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 81 AND kvadratura <= 95")
-    #     kategorije['81-95'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 96 AND kvadratura <= 110")
-    #     kategorije['96-110'] = self.cursor.fetchone()['broj']
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P' AND kvadratura > 110")
-    #     kategorije['od_111'] = self.cursor.fetchone()['broj']
-    #     return kategorije
-    
-    # def broj_stanova_za_prodaju(self):
-    #     self.cursor.execute("SELECT COUNT(*) AS broj FROM nekretnine WHERE tip = 'stan' AND ponuda = 'P'")
-    #     return self.cursor.fetchone()['broj']
-        
-    # def nekretnine_po_dekadama(self):
-    #     nekretnine = {}
-    #     prepared_statement = "SELECT COUNT(*) AS broj FROM nekretnine WHERE godina_izgradnje >= %s AND godina_izgradnje <= %s"
-    #     dekade = [(1951, 1960), (1961, 1970), (1971, 1980), (1981, 1990), (1991, 2000), (2001, 2010), (2011, 2020)]
-    #     for d in dekade:
-    #         self.cursor.execute(prepared_statement, d)
-    #         nekretnine[str(d)] = self.cursor.fetchone()['broj']
-    #     return nekretnine
 
 
 # class MysqlDAO:
