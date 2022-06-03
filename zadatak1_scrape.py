@@ -1,4 +1,4 @@
-# Run from the Makefile as 'make scrape'!
+# Run as a Makefile command - "make scrape"
 
 from db.db import MysqlDAO
 from scraper.run_scraper import Scraper
