@@ -95,7 +95,7 @@ class MysqlDAO:
         self.cursor.execute("SELECT marka, COUNT(*) AS cnt FROM vozila.vozila GROUP BY marka ORDER by cnt DESC")
         return self.cursor.fetchall()
 
-    def gradovi_count(self):
+    def lokacija_count(self):
         self.cursor.execute("SELECT lokacija_prodavca, COUNT(*) AS cnt FROM vozila.vozila GROUP BY lokacija_prodavca ORDER BY cnt DESC")
         return self.cursor.fetchall()
     
@@ -124,7 +124,61 @@ class MysqlDAO:
     def sorted_snaga(self):
         self.cursor.execute("SELECT * FROM vozila.vozila ORDER BY CAST(REGEXP_SUBSTR(snaga, '(?<=/)\\\\d+') AS UNSIGNED) DESC LIMIT 10")    # Note the 4 backslashes for Python
         return self.cursor.fetchall()
+    
+    def sorted_kilometraza(self):
+        self.cursor.execute("SELECT * FROM vozila.vozila ORDER BY kilometraza DESC LIMIT 10")
+        return self.cursor.fetchall()
+    
+    def lokacija_count_top_10(self):
+        self.cursor.execute("SELECT lokacija_prodavca, COUNT(*) AS cnt FROM vozila.vozila GROUP BY lokacija_prodavca ORDER BY cnt DESC LIMIT 10")
+        return self.cursor.fetchall()
+    
+    def vozila_count(self):
+        self.cursor.execute("SELECT COUNT(*) AS cnt FROM vozila.vozila")
+        return self.cursor.fetchone()['cnt']
 
+    def opsezi_kilometraza(self):
+        self.cursor.execute(""" SELECT
+                                    CASE 
+                                        WHEN kilometraza BETWEEN 0 and 50000 THEN '0-50000'
+                                        WHEN kilometraza BETWEEN 50000 and 99999 THEN '50000-99999'
+                                        WHEN kilometraza BETWEEN 100000 and 149999 THEN '100000-149999'
+                                        WHEN kilometraza BETWEEN 150000 and 199999 THEN '150000-199999'
+                                        WHEN kilometraza BETWEEN 200000 and 249999 THEN '200000-249999'
+                                        WHEN kilometraza BETWEEN 250000 and 299999 THEN '250000-299999'
+                                        WHEN kilometraza >= 300000 THEN '300000+'
+                                    END AS km,
+                                    COUNT(*) as cnt
+                                FROM
+                                    vozila.vozila
+                                GROUP BY km
+                                ORDER BY CAST(REGEXP_SUBSTR(km, '[0-9]+') AS UNSIGNED)""")
+        return self.cursor.fetchall()
+    
+    def opsezi_godista(self):
+        self.cursor.execute(""" SELECT
+                                    CASE 
+                                        WHEN godiste <= 1960 THEN '<1960'
+                                        WHEN godiste BETWEEN 1961 and 1970 THEN '1961-1970'
+                                        WHEN godiste BETWEEN 1971 and 1980 THEN '1971-1980'
+                                        WHEN godiste BETWEEN 1981 and 1990 THEN '1981-1990'
+                                        WHEN godiste BETWEEN 1991 and 2000 THEN '1991-2000'
+                                        WHEN godiste BETWEEN 2001 and 2005 THEN '2001-2005'
+                                        WHEN godiste BETWEEN 2006 and 2010 THEN '2006-2010'
+                                        WHEN godiste BETWEEN 2011 and 2015 THEN '2011-2015'
+                                        WHEN godiste BETWEEN 2016 and 2020 THEN '2016-2020'
+                                        WHEN godiste >= 2021 THEN '>=2021'
+                                    END AS god,
+                                    COUNT(*) as cnt
+                                FROM
+                                    vozila.vozila
+                                GROUP BY god
+                                ORDER BY CAST(REGEXP_SUBSTR(god, '[0-9]+') AS UNSIGNED);""")
+        return self.cursor.fetchall()
+    
+    def tip_menjaca_counts(self):
+        self.cursor.execute("SELECT REGEXP_SUBSTR(LOWER(menjac), '(automatski|manuelni)') AS tip_menjaca, COUNT(*) AS cnt FROM vozila.vozila GROUP BY tip_menjaca")
+        return self.cursor.fetchall()
 
 
 # class MysqlDAO:
