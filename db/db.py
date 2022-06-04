@@ -158,7 +158,7 @@ class MysqlDAO:
     def opsezi_godista(self):
         self.cursor.execute(""" SELECT
                                     CASE 
-                                        WHEN godiste <= 1960 THEN '<1960'
+                                        WHEN godiste <= 1960 THEN '<=1960'
                                         WHEN godiste BETWEEN 1961 and 1970 THEN '1961-1970'
                                         WHEN godiste BETWEEN 1971 and 1980 THEN '1971-1980'
                                         WHEN godiste BETWEEN 1981 and 1990 THEN '1981-1990'
@@ -178,6 +178,26 @@ class MysqlDAO:
     
     def tip_menjaca_counts(self):
         self.cursor.execute("SELECT REGEXP_SUBSTR(LOWER(menjac), '(automatski|manuelni)') AS tip_menjaca, COUNT(*) AS cnt FROM vozila.vozila GROUP BY tip_menjaca")
+        return self.cursor.fetchall()
+    
+    def opsezi_cena(self):
+        self.cursor.execute(""" SELECT
+                                    CASE 
+                                        WHEN CAST(cena AS UNSIGNED) <= 1999 THEN '<=1999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 2000 and 4999 THEN '2000-4999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 5000 and 9999 THEN '5000-9999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 10000 and 14999 THEN '10000-14999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 15000 and 19999 THEN '15000-19999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 20000 and 24999 THEN '20000-24999'
+                                        WHEN CAST(cena AS UNSIGNED) BETWEEN 25000 and 29999 THEN '25000-29999'
+                                        WHEN CAST(cena AS UNSIGNED) >= 30000 THEN '>=30000'
+                                    END AS opseg_cena,
+                                    COUNT(*) as cnt
+                                FROM
+                                    vozila.vozila
+                                WHERE cena REGEXP '^[0-9]+$'
+                                GROUP BY opseg_cena
+                                ORDER BY CAST(REGEXP_SUBSTR(opseg_cena, '[0-9]+') AS UNSIGNED)""")
         return self.cursor.fetchall()
 
 
