@@ -1,6 +1,5 @@
 # NOTE: The commands are designed for Windows
 
-# TODO: Make the scrape command last for 6 hours max
 scrape: clear_tmp
 	make -j 2 run_proxies_scraper run_vozilo_scraper
 
