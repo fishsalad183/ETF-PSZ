@@ -10,7 +10,6 @@ class MysqlDAO:
         # 'db': 'vozila',
         # 'db': 'nekretnine',
     }
-    DUMP_FILE = "db\Dump20220602.sql"
 
     def __init__(self, database=""):
         if database != "":
@@ -28,9 +27,9 @@ class MysqlDAO:
         self.cursor.close()
         self.conn.close()
 
-    def import_database_from_dump(self):
-        with open(self.DUMP_FILE, encoding='utf-8') as f:
-            # Because the insert statement in the dump file is only one line
+    def import_database_from_dump(self, dump_file: str):
+        with open(dump_file, encoding='utf-8') as f:
+            # In case the insert statement in dump_file is only one line
             self.cursor.execute('SET GLOBAL max_allowed_packet=67108864')
             self.conn.commit()
             self.cursor.close()
