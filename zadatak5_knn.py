@@ -13,7 +13,7 @@ class KNN:
             case 'manhattan':
                 self._distance_metrci = KNN.manhattan_distance
             case _:
-                raise ValueError("Unknown metric: {metric}")
+                raise ValueError(f"Unknown metric: {metric}")
         
     def fit(self, xtrain: pd.DataFrame, ytrain: pd.DataFrame):
         self._xtrain = xtrain
