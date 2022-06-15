@@ -5,21 +5,22 @@ from sklearn.model_selection import train_test_split
 
 class KNN:
     
-    def __init__(self, df: pd.DataFrame) -> None:
-        self.k: int = KNN.compute_k(df.shape[0])    # self.k = odd integer closest to the square root of the number of entries
-        pass
-
-    def scale(self, df: pd.DataFrame) -> pd.DataFrame:
-        scaler = StandardScaler()
-        scaler.fit(df.drop('TARGET CLASS', axis=1))
-        scaled_features = scaler.transform(df.drop('TARGET CLASS'), axis=1)
-        df_feat = pd.DataFrame(scaled_features, columns=df.columns[:-1])
-        return df_feat
-
-    def train(self, df: pd.DataFrame):
-        X = self.scale(df)
-        y = df['TARGET CLASS']
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    def __init__(self, n_neighbors: int, metric: str) -> None:
+        self._k: int = n_neighbors
+        match metric:
+            case 'euclidian':
+                self._distance_metric = KNN.euclidian_distance
+            case 'manhattan':
+                self._distance_metrci = KNN.manhattan_distance
+            case _:
+                raise ValueError("Unknown metric: {metric}")
+        
+    def fit(self, xtrain: pd.DataFrame, ytrain: pd.DataFrame):
+        self._xtrain = xtrain
+        self._ytrain = ytrain
+        
+    def predict(self, xtest: pd.DataFrame):
+        pass    # TODO: implement
 
     @staticmethod
     def euclidian_distance(vector1, vector2) -> float:
@@ -31,4 +32,4 @@ class KNN:
 
     @staticmethod
     def compute_k(data_count: int) -> int:
-        return 2 * math.floor(math.sqrt(data_count) / 2) + 1
+        return 2 * math.floor(math.sqrt(data_count) / 2) + 1    # odd integer closest to the square root of the data count
