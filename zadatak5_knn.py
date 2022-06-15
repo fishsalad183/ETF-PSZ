@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 class KNN:
     
     def __init__(self, df: pd.DataFrame) -> None:
-        self.k: int = 2 * math.floor(math.sqrt(df.shape[0]) / 2) + 1    # self.k = odd integer closest to the square root of the number of entries
+        self.k: int = KNN.compute_k(df.shape[0])    # self.k = odd integer closest to the square root of the number of entries
         pass
 
     def scale(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -28,3 +28,7 @@ class KNN:
     @staticmethod
     def manhattan_distance(vector1, vector2) -> float:
         return sum(abs(val1 - val2) for val1, val2 in zip(vector1, vector2))
+
+    @staticmethod
+    def compute_k(data_count: int) -> int:
+        return 2 * math.floor(math.sqrt(data_count) / 2) + 1
