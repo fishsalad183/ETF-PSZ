@@ -2,7 +2,6 @@ import math
 import typing
 import numpy as np
 import pandas as pd
-import time
 from sklearn.model_selection import train_test_split
 
 class KNN:
@@ -22,60 +21,21 @@ class KNN:
         self._ytrain = ytrain
         
     def predict(self, xtest: pd.DataFrame) -> list:
-        # ret = np.empty(shape=(xtest.shape[0], 2))
         ret = []
         
         for i_test, row in xtest.iterrows():
-            # start_time_iteration = time.time()
-            
-            # distances
-            # start_time_dist = time.time()
             distances = self._compute_distances(row)
-            # end_time_dist = time.time()
-            # print(f"distance computation time: {end_time_dist - start_time_dist}")
         
             # vote
-            # start_time_vote = time.time()
             votes = {}
             for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
                 yclass = self._ytrain[ind]
                 votes[yclass] = votes.get(yclass, 0) + 1
             predicted_class = max(votes, key=votes.get)
-            # end_time_vote = time.time()
-            # print(f"voting computation time: {end_time_vote - start_time_vote} | predicted class: {predicted_class}")
-            
-            # np.append(ret, predicted_class)
+
             ret.append(predicted_class)
-            
-            # end_time_iteration = time.time()
-            # print(f"single iteration time ({i_test}/{xtest.shape[0]}): {end_time_iteration - start_time_iteration}")
         
         return ret
-    
-    # def predict_single(self, vector: pd.Series):
-    #     start_time_dist = time.time()
-    #     distances = self._compute_distances(vector)
-    #     end_time_dist = time.time()
-    #     print(f"distance computation time: {end_time_dist - start_time_dist}")
-    
-    #     # vote
-    #     start_time_vote = time.time()
-    #     votes = {}
-    #     for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
-    #         yclass = self._ytrain[ind]
-    #         votes[yclass] = votes.get(yclass, 0) + 1
-    #     predicted_class = max(votes, key=votes.get)
-    #     end_time_vote = time.time()
-    #     print(f"voting computation time: {end_time_vote - start_time_vote} | predicted class: {predicted_class}")
-        
-    #     return predicted_class
-    
-    # def _vote(self, distances: typing.Dict[int, float]):
-    #     votes = {}
-    #     for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
-    #         yclass = self._ytrain[ind]
-    #         votes[yclass] = votes.get(yclass, 0) + 1
-    #     return max(votes, key=votes.get)
     
     def _compute_distances(self, vector) -> typing.Dict[int, float]:
         distances = {}
