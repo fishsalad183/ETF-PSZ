@@ -2,6 +2,7 @@ import math
 import typing
 import numpy as np
 import pandas as pd
+import time
 from sklearn.model_selection import train_test_split
 
 class KNN:
@@ -20,28 +21,62 @@ class KNN:
         self._xtrain = xtrain
         self._ytrain = ytrain
         
-    def predict(self, xtest: pd.DataFrame):
-        ret = np.empty(shape=(xtest.shape[0], 2))
+    def predict(self, xtest: pd.DataFrame) -> list:
+        # ret = np.empty(shape=(xtest.shape[0], 2))
+        ret = []
         
-        for _, row in xtest.iterrows():
+        for i_test, row in xtest.iterrows():
+            # start_time_iteration = time.time()
+            
+            # distances
+            # start_time_dist = time.time()
             distances = self._compute_distances(row)
+            # end_time_dist = time.time()
+            # print(f"distance computation time: {end_time_dist - start_time_dist}")
         
             # vote
+            # start_time_vote = time.time()
             votes = {}
-            k_cnt = 0
-            for ind, _ in sorted(distances.items(), key=lambda x: x[1]):
+            for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
                 yclass = self._ytrain[ind]
                 votes[yclass] = votes.get(yclass, 0) + 1
-                
-                k_cnt += 1
-                if k_cnt >= self._k:
-                    break
             predicted_class = max(votes, key=votes.get)
+            # end_time_vote = time.time()
+            # print(f"voting computation time: {end_time_vote - start_time_vote} | predicted class: {predicted_class}")
             
-            np.append(ret, predicted_class)
+            # np.append(ret, predicted_class)
+            ret.append(predicted_class)
+            
+            # end_time_iteration = time.time()
+            # print(f"single iteration time ({i_test}/{xtest.shape[0]}): {end_time_iteration - start_time_iteration}")
         
         return ret
-
+    
+    # def predict_single(self, vector: pd.Series):
+    #     start_time_dist = time.time()
+    #     distances = self._compute_distances(vector)
+    #     end_time_dist = time.time()
+    #     print(f"distance computation time: {end_time_dist - start_time_dist}")
+    
+    #     # vote
+    #     start_time_vote = time.time()
+    #     votes = {}
+    #     for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
+    #         yclass = self._ytrain[ind]
+    #         votes[yclass] = votes.get(yclass, 0) + 1
+    #     predicted_class = max(votes, key=votes.get)
+    #     end_time_vote = time.time()
+    #     print(f"voting computation time: {end_time_vote - start_time_vote} | predicted class: {predicted_class}")
+        
+    #     return predicted_class
+    
+    # def _vote(self, distances: typing.Dict[int, float]):
+    #     votes = {}
+    #     for ind, _ in sorted(distances.items(), key=lambda x: x[1])[:self._k]:
+    #         yclass = self._ytrain[ind]
+    #         votes[yclass] = votes.get(yclass, 0) + 1
+    #     return max(votes, key=votes.get)
+    
     def _compute_distances(self, vector) -> typing.Dict[int, float]:
         distances = {}
         for i, row in self._xtrain.iterrows():
@@ -50,7 +85,7 @@ class KNN:
 
     @staticmethod
     def euclidian_distance(vector1, vector2) -> float:
-        return math.sqrt(sum((val1 - val2)**2 for val1, val2 in zip(vector1, vector2)))
+        return math.sqrt(sum((val1 - val2)*(val1 - val2) for val1, val2 in zip(vector1, vector2)))
     
     @staticmethod
     def manhattan_distance(vector1, vector2) -> float:
