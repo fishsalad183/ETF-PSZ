@@ -1,6 +1,7 @@
 import math
+import typing
+import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 class KNN:
@@ -8,19 +9,44 @@ class KNN:
     def __init__(self, n_neighbors: int, metric: str) -> None:
         self._k: int = n_neighbors
         match metric:
-            case 'euclidian':
+            case 'euclidean':
                 self._distance_metric = KNN.euclidian_distance
             case 'manhattan':
-                self._distance_metrci = KNN.manhattan_distance
+                self._distance_metric = KNN.manhattan_distance
             case _:
                 raise ValueError(f"Unknown metric: {metric}")
         
-    def fit(self, xtrain: pd.DataFrame, ytrain: pd.DataFrame):
+    def fit(self, xtrain: pd.DataFrame, ytrain: pd.Series):
         self._xtrain = xtrain
         self._ytrain = ytrain
         
     def predict(self, xtest: pd.DataFrame):
-        pass    # TODO: implement
+        ret = np.empty(shape=(xtest.shape[0], 2))
+        
+        for i, row in xtest.iterrows():
+            distances = self._compute_distances(row)
+        
+            # vote
+            votes = {}
+            k_cnt = 0
+            for ind, _v in sorted(distances.items(), key=lambda x: x[1]):
+                yclass = self._ytrain[ind]
+                votes[yclass] = votes.get(yclass, 0) + 1
+                
+                k_cnt += 1
+                if k_cnt >= self._k:
+                    break
+            predicted_class = max(votes, key=votes.get)
+            
+            np.append(ret, predicted_class)
+        
+        return ret
+
+    def _compute_distances(self, vector) -> typing.Dict[int, float]:
+        distances = {}
+        for i, row in self._xtrain.iterrows():
+            distances[i] = self._distance_metric(vector, row)
+        return distances
 
     @staticmethod
     def euclidian_distance(vector1, vector2) -> float:
