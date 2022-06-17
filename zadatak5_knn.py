@@ -23,13 +23,13 @@ class KNN:
     def predict(self, xtest: pd.DataFrame):
         ret = np.empty(shape=(xtest.shape[0], 2))
         
-        for i, row in xtest.iterrows():
+        for _, row in xtest.iterrows():
             distances = self._compute_distances(row)
         
             # vote
             votes = {}
             k_cnt = 0
-            for ind, _v in sorted(distances.items(), key=lambda x: x[1]):
+            for ind, _ in sorted(distances.items(), key=lambda x: x[1]):
                 yclass = self._ytrain[ind]
                 votes[yclass] = votes.get(yclass, 0) + 1
                 
