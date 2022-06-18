@@ -1,8 +1,6 @@
 import math
 import typing
-import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 class KNN:
     
@@ -23,7 +21,7 @@ class KNN:
     def predict(self, xtest: pd.DataFrame) -> list:
         ret = []
         
-        for i_test, row in xtest.iterrows():
+        for _, row in xtest.iterrows():
             distances = self._compute_distances(row)
         
             # vote
