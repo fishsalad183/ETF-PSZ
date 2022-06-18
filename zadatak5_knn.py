@@ -11,8 +11,10 @@ class KNN:
                 self._distance_metric = KNN.euclidian_distance
             case 'manhattan':
                 self._distance_metric = KNN.manhattan_distance
+            case 'chebyshev':
+                self._distance_metric = KNN.chebyshev_distance
             case _:
-                raise ValueError(f"Unknown metric: {metric}")
+                raise ValueError(f"Unknown metric: '{metric}'")
         
     def fit(self, xtrain: pd.DataFrame, ytrain: pd.Series):
         self._xtrain = xtrain
@@ -48,6 +50,10 @@ class KNN:
     @staticmethod
     def manhattan_distance(vector1, vector2) -> float:
         return sum(abs(val1 - val2) for val1, val2 in zip(vector1, vector2))
+    
+    @staticmethod
+    def chebyshev_distance(vector1, vector2) -> float:
+        return max(abs(val1 - val2) for val1, val2 in zip(vector1, vector2))
 
     @staticmethod
     def compute_k(data_count: int) -> int:
