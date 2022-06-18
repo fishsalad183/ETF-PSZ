@@ -6,4 +6,3 @@ TODO:
 - Make the `make scrape` command run for 6 hours max
 - Word document for Task 2
 - Task 4
-- Task 5
