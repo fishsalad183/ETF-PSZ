@@ -1,0 +1,2 @@
+class LinReg:
+    pass
